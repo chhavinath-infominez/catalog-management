@@ -12,16 +12,12 @@ import org.springframework.context.annotation.Bean;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@EnableDiscoveryClient
 @EnableFeignClients
+@EnableDiscoveryClient
 @SpringBootApplication
 public class UserServiceApplication {
 
     public static Map<String, DatabaseConfig> tenantDataBaseMap = new ConcurrentHashMap<>();
-
-    public static void main(String[] args) {
-        SpringApplication.run(UserServiceApplication.class, args);
-    }
 
     @Bean
     public FilterRegistrationBean<TenantFilter> tenantFilter() {
@@ -30,6 +26,10 @@ public class UserServiceApplication {
         registrationBean.addUrlPatterns("/*"); // Adjust as needed
         registrationBean.setOrder(1); // Ensure it executes early
         return registrationBean;
+    }
+
+    public static void main(String[] args) {
+        SpringApplication.run(UserServiceApplication.class, args);
     }
 
 }

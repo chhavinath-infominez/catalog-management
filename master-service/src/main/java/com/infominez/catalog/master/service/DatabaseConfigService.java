@@ -16,20 +16,20 @@ public class DatabaseConfigService {
 
     private final DatabaseConfigRepository dataSourceRepository;
 
-    public List<DatabaseConfig> getAllDataSource() {
+    public BaseResponse<List<DatabaseConfig>> getAllDataSource() {
         log.info("fetching all data sources");
-        BaseResponse response = new BaseResponse();
-//        try {
+        BaseResponse<List<DatabaseConfig>> response = new BaseResponse<>();
+        try {
             List<DatabaseConfig> databaseConfigList = dataSourceRepository.findAll();
             if (databaseConfigList.isEmpty()) {
 //                return response.set(302, "Database Config not found");
             }
-//            response.set(200, "Success", databaseConfigList);
-//        } catch (Exception e) {
-//            log.error("Exception while fetching database config list : ", e);
-//            response.setSomethingWentWrong();
-//        }
-//        return response;
-        return databaseConfigList;
+            response.set(200, "Success", databaseConfigList);
+        } catch (Exception e) {
+            log.error("Exception while fetching database config list : ", e);
+            response.setSomethingWentWrong();
+        }
+        return response;
+//        return databaseConfigList;
     }
 }

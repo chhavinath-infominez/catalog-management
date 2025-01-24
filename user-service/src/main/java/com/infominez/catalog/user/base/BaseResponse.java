@@ -4,6 +4,7 @@
 package com.infominez.catalog.user.base;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.infominez.catalog.user.entity.User;
 import lombok.Data;
 import lombok.ToString;
 
@@ -20,20 +21,20 @@ public class BaseResponse<T> implements Serializable {
     private String handlerUrl;
 
 
-    public BaseResponse set(Integer status, String message, T response) {
+    public BaseResponse<T> set(Integer status, String message, T response) {
         this.status = status;
         this.message = message;
         this.response = response;
         return this;
     }
 
-    public BaseResponse set(Integer status, String message) {
+    public BaseResponse<T> set(Integer status, String message) {
         this.status = status;
         this.message = message;
         return this;
     }
 
-    public BaseResponse setInternalServerError() {
+    public BaseResponse<T> setInternalServerError() {
         this.status = 500;
         this.message = "Internal Server Error";
         this.response = null;
@@ -46,21 +47,21 @@ public class BaseResponse<T> implements Serializable {
         this.response = null;
     }
 
-    public BaseResponse setUnauthorized() {
+    public BaseResponse<T> setUnauthorized() {
         this.status = 401;
         this.message = "Unauthorised Access";
         this.response = null;
         return this;
     }
 
-    public BaseResponse setInvalidPinOrPhone() {
+    public BaseResponse<T> setInvalidPinOrPhone() {
         this.status = 401;
         this.message = "Invalid phone number or pin";
         this.response = null;
         return this;
     }
 
-    public BaseResponse setTemporaryDown() {
+    public BaseResponse<T> setTemporaryDown() {
         this.status = 302;
         this.message = "We are unable to process your request currently. Kindly check after sometime.";
         this.response = null;

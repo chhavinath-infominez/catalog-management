@@ -1,6 +1,6 @@
-package com.infominez.catalog.user.tenant;
+package com.infominez.catalog.auth.tenant;
 
-import com.infominez.catalog.user.UserServiceApplication;
+import com.infominez.catalog.auth.AuthServiceApplication;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -43,8 +43,8 @@ public class DataSourceConfig {
 
     private Map<Object, Object> buildDataSourceMap() {
         Map<Object, Object> dataSources = new HashMap<>();
-        System.out.println("Map size : " + UserServiceApplication.tenantDataBaseMap.size());
-        UserServiceApplication.tenantDataBaseMap.forEach((tenantId, dbConfig) -> {
+        System.out.println("Map size : " + AuthServiceApplication.tenantDataBaseMap.size());
+        AuthServiceApplication.tenantDataBaseMap.forEach((tenantId, dbConfig) -> {
             DataSource dataSource = DataSourceBuilder.create()
                     .url(dbConfig.getUrl())
                     .username(dbConfig.getUsername())

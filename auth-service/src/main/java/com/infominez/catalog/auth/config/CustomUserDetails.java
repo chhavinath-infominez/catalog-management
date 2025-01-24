@@ -1,6 +1,6 @@
 package com.infominez.catalog.auth.config;
 
-import com.infominez.catalog.auth.entity.User;
+import com.infominez.catalog.auth.wrapper.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -14,7 +14,7 @@ public class CustomUserDetails implements UserDetails {
 
     public CustomUserDetails(User user) {
         this.username = user.getPhone();
-        this.password = user.getPin();
+        this.password = user.getPassword();
     }
 
     @Override

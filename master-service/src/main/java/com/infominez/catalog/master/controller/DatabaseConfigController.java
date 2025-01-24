@@ -20,7 +20,7 @@ public class DatabaseConfigController {
     private final DatabaseConfigService databaseConfigService;
 
     @GetMapping("/getAllDatabaseConfig")
-    public List<DatabaseConfig> getAllDatabaseConfig() {
+    public BaseResponse<List<DatabaseConfig>> getAllDatabaseConfig() {
         log.info("fetching all database config");
         return databaseConfigService.getAllDataSource();
     }

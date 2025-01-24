@@ -1,7 +1,7 @@
-package com.infominez.catalog.user.feign;
+package com.infominez.catalog.auth.feign;
 
-import com.infominez.catalog.user.base.BaseResponse;
-import com.infominez.catalog.user.wrapper.DatabaseConfig;
+import com.infominez.catalog.auth.base.BaseResponse;
+import com.infominez.catalog.auth.wrapper.DatabaseConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;

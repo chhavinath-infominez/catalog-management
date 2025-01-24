@@ -9,6 +9,7 @@ import com.infominez.catalog.user.wrapper.DatabaseConfig;
 import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -24,9 +25,12 @@ public class ScheduledTask {
 
     private final MasterServiceFeign masterServiceFeign;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @PostConstruct
     public void runImmediately() {
-        initializeTenantDataSource();  // Call the scheduled method directly on startup
+        initializeTenantDataSource();
     }
 
     @Scheduled(cron = "0 */5 * * * ?")
@@ -34,14 +38,10 @@ public class ScheduledTask {
         log.info("Initializing tenant data source started at : {}", new Date());
         try {
             Map<String, DatabaseConfig> tempMap = new ConcurrentHashMap<>();
-            List<DatabaseConfig> tenantDatabaseList = masterServiceFeign.getAllDatabaseConfig();
-            System.out.println(tenantDatabaseList);
-//            String responseString = response.getResponse().toString();
-//            System.out.println(responseString);
-//            ObjectMapper objectMapper = new ObjectMapper();
-//            List<DatabaseConfig> tenantDatabaseList = objectMapper.readValue(responseString, objectMapper.getTypeFactory().constructCollectionType(List.class, DatabaseConfig.class));
-            log.info("Database list size : {}", tenantDatabaseList.size() );
-            tenantDatabaseList.forEach(tenantDatabase -> {
+            BaseResponse<List<DatabaseConfig>> response = masterServiceFeign.getAllDatabaseConfig();
+            log.info("Database list size : {}", response.getResponse().size() );
+
+            response.getResponse().forEach(tenantDatabase -> {
                 tempMap.put(tenantDatabase.getTenantId(), tenantDatabase);
             });
 
