@@ -16,7 +16,6 @@ import org.flywaydb.core.Flyway;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.sql.Statement;
 
 @Slf4j
@@ -32,36 +31,34 @@ public class TenantService {
     private final DatabaseConfigRepository databaseConfigRepository;
 
 
-    public BaseResponse createTenant(TenantRequest tenantRequest) {
+    public BaseResponse<Tenant> createTenant(TenantRequest tenantRequest) {
         log.info("creating tenant : {}", tenantRequest);
-        HikariDataSource hikariDataSource;
-        if (masterDataSource instanceof HikariDataSource) {
-            hikariDataSource = (HikariDataSource) masterDataSource;
-        } else {
-            throw new IllegalStateException("DataSource is not an instance of HikariDataSource");
+        BaseResponse<Tenant> response = new BaseResponse<>();
+        try {
+            Tenant tenant = tenantRepository.findByTenantId(tenantRequest.getTenantId()).orElse(null);
+            if (tenant != null) {
+                return response.set(302, "Tenant already exist");
+            }
+            tenant = new Tenant();
+            tenant.setTenantId(tenantRequest.getTenantId());
+            tenant.setName(tenantRequest.getName());
+            tenant.setLogo(tenantRequest.getLogo());
+            tenant.setAddress(tenantRequest.getAddress());
+            tenant.setStatus(EnumUtils.TenantStatus.ACTIVE);
+            tenant.setCreatedBy(1);
+            tenant = tenantRepository.save(tenant);
+
+            createTenantDatabase(tenant);
+            createDatabaseConfig(tenant);
+            response.set(200, "Success", tenant);
+        } catch (Exception e) {
+            log.info("Exception while creating tenant : ", e);
+            response.setSomethingWentWrong();
         }
-        BaseResponse response = new BaseResponse();
-        Tenant tenant = new Tenant();
-        tenant.setTenantId(tenantRequest.getTenantId());
-        tenant.setName(tenantRequest.getName());
-        tenant.setLogo(tenantRequest.getLogo());
-        tenant.setAddress(tenantRequest.getAddress());
-        tenant.setStatus(EnumUtils.TenantStatus.ACTIVE);
-        tenant.setCreatedBy(1);
-
-        tenant = tenantRepository.save(tenant);
-        createDatabase(tenant);
-
-        DatabaseConfig databaseConfig = new DatabaseConfig();
-        databaseConfig.setTenantId(tenant.getTenantId());
-        databaseConfig.setUrl(hikariDataSource.getJdbcUrl().replace("master", tenant.getTenantId()));
-        databaseConfig.setUsername(hikariDataSource.getUsername());
-        databaseConfig.setPassword(hikariDataSource.getPassword());
-        databaseConfigRepository.save(databaseConfig);
-        return response.set(200, "SUCCESS", tenant);
+        return response;
     }
 
-    private void createDatabase(Tenant tenant) {
+    private void createTenantDatabase(Tenant tenant) {
         try (Connection connection = masterDataSource.getConnection();
              Statement statement = connection.createStatement()) {
 
@@ -77,7 +74,26 @@ public class TenantService {
              flyway.migrate();
 
         } catch (Exception e) {
-            log.error("Failed to create tenant database : ", e);
+            throw new RuntimeException(new Exception("Exception while creating tenant database : " + e));
+        }
+    }
+
+    private void createDatabaseConfig(Tenant tenant) {
+        try {
+            HikariDataSource hikariDataSource;
+            if (masterDataSource instanceof HikariDataSource) {
+                hikariDataSource = (HikariDataSource) masterDataSource;
+                DatabaseConfig databaseConfig = new DatabaseConfig();
+                databaseConfig.setTenantId(tenant.getTenantId());
+                databaseConfig.setUrl(hikariDataSource.getJdbcUrl().replace("master", tenant.getTenantId()));
+                databaseConfig.setUsername(hikariDataSource.getUsername());
+                databaseConfig.setPassword(hikariDataSource.getPassword());
+                databaseConfigRepository.save(databaseConfig);
+            } else {
+                throw new IllegalStateException("DataSource is not an instance of HikariDataSource");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(new Exception("Exception while creating database config : " + e));
         }
     }
 }
