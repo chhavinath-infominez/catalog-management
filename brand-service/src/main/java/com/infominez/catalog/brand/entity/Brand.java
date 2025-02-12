@@ -6,15 +6,14 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Proxy;
 
+@Data
 @Entity
-@Table(name = "brand")
-@Getter
-@Setter
-@EqualsAndHashCode(callSuper = true)
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
-@Proxy(lazy = false)
+@Table(name = "brand")
+@EqualsAndHashCode(callSuper = true)
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Brand extends BaseEntity {
 
     @Id
@@ -22,19 +21,26 @@ public class Brand extends BaseEntity {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "name", nullable = false, length = 255)
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "description", length = 255)
+    @Column(name = "description")
     private String description;
 
-    @Column(name = "email", nullable = false, length = 255)
+    @Column(name = "email", nullable = false)
     private String email;
 
-    @Column(name = "mobile", nullable = false, length = 15)
+    @Column(name = "mobile", nullable = false)
     private String mobile;
 
-    @Column(name = "address", length = 255)
+    @Column(name = "status")
+    private Boolean status;
+
+    @ManyToOne
+    @JoinColumn(name = "parent_brand_id", referencedColumnName = "id")
+    private Brand parentBrand;
+
+    @Column(name = "address")
     private String address;
 
     @Column(name = "city", length = 100)
@@ -49,19 +55,10 @@ public class Brand extends BaseEntity {
     @Column(name = "postal_code", length = 10)
     private String postalCode;
 
-    @Column(name = "logo_url", length = 255)
+    @Column(name = "logo_url")
     private String logoUrl;
 
-    @Column(name = "website", length = 255)
+    @Column(name = "website")
     private String website;
-
-    @Column(name = "status")
-    private Boolean status;
-//
-//    @Column(name = "created_by", length = 255)
-//    private String createdBy;
-//
-//    @Column(name = "updated_by", length = 255)
-//    private String updatedBy;
 }
 

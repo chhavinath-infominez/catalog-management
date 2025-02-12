@@ -11,48 +11,36 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-@Service
 @Slf4j
+@Service
 @AllArgsConstructor
 public class BrandService {
 
     private final BrandRepository brandRepository;
 
-
-    public BaseResponse createBrand(Brand brand) {
-        log.info(this.getClass().getName() + " :- createBrand() brand : {}", brand);
-        BaseResponse response = new BaseResponse();
+    public BaseResponse<Brand> createBrand(Brand brand) {
+        log.info("Creating brand : {}", brand);
+        BaseResponse<Brand> response = new BaseResponse<>();
         try {
-            if (brand == null) {
-                response.setStatus(302);
-                response.setMessage(StringUtils.INVALID_REQUEST);
-                return response;
-            }
-            brand.setCreatedBy(1);  // Adjust based on user context
-            brand.setUpdatedBy(1);  // Adjust based on user context
-            brand.setCreatedDate(new Date());
-            brand.setUpdatedDate(new Date());
-            brandRepository.save(brand);
+            brand = brandRepository.save(brand);
+            response.set(200, "Success", brand);
         } catch (Exception e) {
-            log.error("Exception in createBrand() brand: {}", brand, e);
+            log.error("Exception while creating brand : ", e);
             response.setInternalServerError();
         }
         return response;
     }
 
-    public BaseResponse getAllBrands() {
-        log.info(this.getClass().getName() + " :- getAllBrands()");
-        BaseResponse response = new BaseResponse();
+    public BaseResponse<List<Brand>> getAllBrands() {
+        log.info("Fetching all brands");
+        BaseResponse<List<Brand>> response = new BaseResponse<>();
         try {
-            List<Brand> brands = brandRepository.findAll();
-            if (!brands.isEmpty()) {
-                response.setStatus(200);
-                response.setMessage(StringUtils.SUCCESS);
-                response.setResponse(brands);
-            } else {
-                response.setStatus(302);
-                response.setMessage(StringUtils.BRAND_NOT_FOUND);
+            List<Brand> brandList = brandRepository.findAll();
+            if (brandList.isEmpty()) {
+                return response.set(302, "Brand not found");
             }
+            response.setStatus(302);
+            response.setMessage(StringUtils.BRAND_NOT_FOUND);
         } catch (Exception e) {
             log.error("Exception in getAllBrands()", e);
             response.setInternalServerError();
@@ -60,101 +48,84 @@ public class BrandService {
         return response;
     }
 
-    public BaseResponse getBrandById(Long id) {
-        log.info(this.getClass().getName() + " :- getBrandById() id: {}", id);
-        BaseResponse response = new BaseResponse();
+    public BaseResponse<Brand> getBrandById(Long id) {
+        log.info("Fetching brand by id: {}", id);
+        BaseResponse<Brand> response = new BaseResponse<>();
         try {
             if (id == null) {
                 response.setStatus(302);
                 response.setMessage(StringUtils.INVALID_REQUEST);
                 return response;
             }
-            Optional<Brand> brand = brandRepository.findById(id);
-            if (brand.isPresent()) {
-                response.setStatus(200);
-                response.setMessage(StringUtils.SUCCESS);
-                response.setResponse(brand.get());
-            } else {
+            Brand brand = brandRepository.findById(id).orElse(null);
+            if (brand == null) {
                 response.setStatus(302);
                 response.setMessage(StringUtils.BRAND_NOT_FOUND);
             }
+            response.setStatus(200);
+            response.setMessage(StringUtils.SUCCESS);
+            response.setResponse(brand);
         } catch (Exception e) {
-            log.error("Exception in getBrandById() id: {}, Exception: {}", id, e.getMessage());
+            log.error("Exception while fetching brand by id: {}, Exception: {}", id, e.getMessage());
             response.setInternalServerError();
         }
         return response;
     }
 
 
-    public BaseResponse updateBrand(Brand brand) {
-        log.info(this.getClass().getName() + " :- updateBrand() brand: {}", brand);
-        BaseResponse response = new BaseResponse();
+    public BaseResponse<Brand> updateBrand(Brand brand) {
+        log.info("Updating brand: {}", brand);
+        BaseResponse<Brand> response = new BaseResponse<>();
         try {
-            if (brand == null) {
-                response.setStatus(302);
-                response.setMessage(StringUtils.INVALID_REQUEST);
-                return response;
+            if (brand == null || brand.getId() == null) {
+                return response.set(302, StringUtils.INVALID_REQUEST);
+            }
+            Brand existingBrand = brandRepository.findById(brand.getId()).orElse(null);
+            if (existingBrand == null) {
+                return response.set(302, StringUtils.BRAND_NOT_FOUND);
+            }
+            if (brand.getName() != null && !brand.getName().isEmpty()) {
+                existingBrand.setName(brand.getName());
+            }
+            if (brand.getDescription() != null && !brand.getDescription().isEmpty()) {
+                existingBrand.setDescription(brand.getDescription());
+            }
+            if (brand.getEmail() != null && !brand.getEmail().isEmpty()) {
+                existingBrand.setEmail(brand.getEmail());
+            }
+            if (brand.getMobile() != null && !brand.getMobile().isEmpty()) {
+                existingBrand.setMobile(brand.getMobile());
+            }
+            if (brand.getAddress() != null && !brand.getAddress().isEmpty()) {
+                existingBrand.setAddress(brand.getAddress());
+            }
+            if (brand.getCity() != null && !brand.getCity().isEmpty()) {
+                existingBrand.setCity(brand.getCity());
+            }
+            if (brand.getState() != null && !brand.getState().isEmpty()) {
+                existingBrand.setState(brand.getState());
+            }
+            if (brand.getCountry() != null && !brand.getCountry().isEmpty()) {
+                existingBrand.setCountry(brand.getCountry());
+            }
+            if (brand.getPostalCode() != null && !brand.getPostalCode().isEmpty()) {
+                existingBrand.setPostalCode(brand.getPostalCode());
+            }
+            if (brand.getLogoUrl() != null && !brand.getLogoUrl().isEmpty()) {
+                existingBrand.setLogoUrl(brand.getLogoUrl());
+            }
+            if (brand.getWebsite() != null && !brand.getWebsite().isEmpty()) {
+                existingBrand.setWebsite(brand.getWebsite());
+            }
+            if (brand.getStatus() != null) {
+                existingBrand.setStatus(brand.getStatus());
             }
 
-            if (brand.getId() != null) {
-                Brand existingBrand = brandRepository.findById(brand.getId()).orElse(null);
+            existingBrand = brandRepository.save(existingBrand);
 
-                if (existingBrand != null) {
-                    if (brand.getName() != null && !brand.getName().isEmpty()) {
-                        existingBrand.setName(brand.getName());
-                    }
-                    if (brand.getDescription() != null && !brand.getDescription().isEmpty()) {
-                        existingBrand.setDescription(brand.getDescription());
-                    }
-                    if (brand.getEmail() != null && !brand.getEmail().isEmpty()) {
-                        existingBrand.setEmail(brand.getEmail());
-                    }
-                    if (brand.getMobile() != null && !brand.getMobile().isEmpty()) {
-                        existingBrand.setMobile(brand.getMobile());
-                    }
-                    if (brand.getAddress() != null && !brand.getAddress().isEmpty()) {
-                        existingBrand.setAddress(brand.getAddress());
-                    }
-                    if (brand.getCity() != null && !brand.getCity().isEmpty()) {
-                        existingBrand.setCity(brand.getCity());
-                    }
-                    if (brand.getState() != null && !brand.getState().isEmpty()) {
-                        existingBrand.setState(brand.getState());
-                    }
-                    if (brand.getCountry() != null && !brand.getCountry().isEmpty()) {
-                        existingBrand.setCountry(brand.getCountry());
-                    }
-                    if (brand.getPostalCode() != null && !brand.getPostalCode().isEmpty()) {
-                        existingBrand.setPostalCode(brand.getPostalCode());
-                    }
-                    if (brand.getLogoUrl() != null && !brand.getLogoUrl().isEmpty()) {
-                        existingBrand.setLogoUrl(brand.getLogoUrl());
-                    }
-                    if (brand.getWebsite() != null && !brand.getWebsite().isEmpty()) {
-                        existingBrand.setWebsite(brand.getWebsite());
-                    }
-                    if (brand.getStatus() != null) {
-                        existingBrand.setStatus(brand.getStatus());
-                    }
-
-                    existingBrand.setUpdatedBy(1);
-                    existingBrand.setUpdatedDate(new Date());
-
-                    existingBrand = brandRepository.save(existingBrand);
-
-                    response.setStatus(200);
-                    response.setMessage(StringUtils.BRAND_UPDATED_SUCCESSFULLY);
-                    response.setResponse(existingBrand);
-                } else {
-                    response.setStatus(302);
-                    response.setMessage(StringUtils.BRAND_NOT_FOUND);
-                }
-            } else {
-                response.setStatus(302);
-                response.setMessage(StringUtils.INVALID_REQUEST);
-            }
+            response.set(200, StringUtils.BRAND_UPDATED_SUCCESSFULLY, existingBrand);
         } catch (Exception e) {
-            log.error("Exception in updateBrand() brand: {}", brand, e);
+            log.error("Exception while updating brand: {}", brand, e);
             response.setInternalServerError();
         }
         return response;
@@ -162,9 +133,9 @@ public class BrandService {
 
 
 
-    public BaseResponse deleteBrand(Long id) {
+    public BaseResponse<Brand> deleteBrand(Long id) {
         log.info(this.getClass().getName() + " :- deleteBrand() id: {}", id);
-        BaseResponse response = new BaseResponse();
+        BaseResponse<Brand> response = new BaseResponse<>();
         try {
             if (id == null) {
                 response.setStatus(302);

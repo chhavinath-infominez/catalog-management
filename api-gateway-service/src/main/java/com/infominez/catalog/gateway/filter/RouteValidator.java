@@ -17,7 +17,9 @@ public class RouteValidator {
             "/auth/forgetPin",
             "/auth/registerUser",
             "/country/getAllCountries",
-            "/map/nearBySearch"
+            "/map/nearBySearch",
+            "/v3/api-docs",
+            "/swagger-ui/**"
     );
 
     public Predicate<ServerHttpRequest> isSecured =

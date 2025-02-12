@@ -17,7 +17,7 @@ public class ProductServiceApplication {
     @Bean
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName(TenantContext.getTenantDataSource().);
+        dataSource.setDriverClassName(TenantContext.getTenantDataSource());
         dataSource.setUrl("jdbc:postgresql://localhost:5432/order");
         dataSource.setUsername("postgres");
         dataSource.setPassword("postgres");
